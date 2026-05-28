@@ -236,8 +236,7 @@
             }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-</head>
+
 <body>
     <div class="form-container">
         <div class="header">
@@ -824,190 +823,117 @@
             mostraMessaggio('Report generato. Incollalo su Telegram!', 'success');
         }
 
-        function exportToPDF() {
+        async function exportToPDF() {
             if (!form.checkValidity()) {
                 form.reportValidity();
                 mostraMessaggio('Compila tutti i campi obbligatori prima di creare il PDF!', 'error');
                 return;
             }
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
             const pdv = document.getElementById('pdv').value || 'N/D';
             const addetto = document.getElementById('addetto').value || 'N/D';
             const valutazione = document.getElementById('valutazione_complessiva').value || 'N/D';
             const nomeFile = `Test Vendita ${pdv} ${addetto} ${valutazione}.pdf`;
 
-            const margin = 15;
-            const pageWidth = 210;
-            const contentWidth = pageWidth - margin * 2;
-            let y = 20;
+            // Costruisce una pagina HTML ottimizzata per la stampa/PDF
+            const dataVal = document.getElementById('data').value || 'N/D';
+            const reparto = document.getElementById('reparto').value || 'N/D';
+            const redattore = document.getElementById('redattore').value || 'N/D';
+            const ruolo = document.getElementById('ruolo').value || 'N/D';
+            const considerazioni = document.getElementById('considerazioni').value || 'N/D';
+            const conclusione = document.getElementById('conclusione').value || 'N/D';
+            const giudizio = document.getElementById('giudizio_riepilogativo').value || 'N/D';
 
-            // Header blu
-            doc.setFillColor(74, 144, 226);
-            doc.rect(0, 0, 210, 30, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(18);
-            doc.setFont('helvetica', 'bold');
-            doc.text('TEST DI VENDITA TRONY', 105, 18, { align: 'center' });
-            y = 40;
+            const row = (label, val) => `<tr><td class="lbl">${label}</td><td class="val">${val || 'N/D'}</td></tr>`;
+            const section = (title) => `<tr class="sec"><td colspan="2">${title}</td></tr>`;
+            const textRow = (label, val) => `<tr><td class="lbl" style="vertical-align:top">${label}</td><td class="val" style="white-space:pre-wrap">${val || 'N/D'}</td></tr>`;
 
-            doc.setTextColor(52, 58, 64);
-            doc.setFontSize(10);
+            const htmlContent = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8">
+            <style>
+                body { font-family: Arial, sans-serif; font-size: 11px; margin: 20px; color: #222; }
+                h1 { background: #4A90E2; color: white; text-align: center; padding: 12px; border-radius: 6px; font-size: 16px; margin-bottom: 16px; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
+                td { padding: 5px 8px; border: 1px solid #ddd; }
+                tr.sec td { background: #EAF2FC; color: #4A90E2; font-weight: bold; font-size: 12px; border-left: 4px solid #4A90E2; }
+                td.lbl { width: 40%; color: #666; font-weight: bold; background: #fafafa; }
+                td.val { color: #222; }
+                .highlight { background: #4A90E2; color: white; text-align: center; font-weight: bold; font-size: 13px; padding: 8px; }
+                @media print { body { margin: 10px; } }
+            </style></head><body>
+            <h1>TEST DI VENDITA TRONY</h1>
+            <table>
+                ${section('INFORMAZIONI GENERALI')}
+                ${row('PUNTO VENDITA', pdv)}
+                ${row('DATA', dataVal)}
+                ${row('ADDETTO', addetto)}
+                ${row('REPARTO', reparto)}
+                ${section('ACCOGLIENZA')}
+                ${row('SALUTO', document.getElementById('saluto').value)}
+                ${row('APPROCCIO', document.getElementById('approccio').value)}
+                ${row('EMPATIA', document.getElementById('empatia').value)}
+                ${row('VALUTAZIONE', document.getElementById('val_saluto').value)}
+                ${section('GESTIONE VENDITA')}
+                ${row('TRATTATIVA', document.getElementById('trattativa').value)}
+                ${row('UP SELLING', document.getElementById('upselling').value)}
+                ${row('CONOSCENZE', document.getElementById('conoscenze').value)}
+                ${row('VALUTAZIONE', document.getElementById('val_trattativa').value)}
+                ${section('GESTIONE KPI')}
+                ${row('CROSS SELLING', document.getElementById('crossselling').value)}
+                ${row('GESTORE', document.getElementById('gestore').value)}
+                ${row('ESTENSIONI', document.getElementById('estensioni').value)}
+                ${row('VALUTAZIONE', document.getElementById('val_cross').value)}
+                ${section('USO ARMI')}
+                ${row('PROMO IN CORSO', document.getElementById('promo').value)}
+                ${row('INDICAZIONI', document.getElementById('indicazioni').value)}
+                ${row('DILAZIONI', document.getElementById('dilazioni').value)}
+                ${row('VALUTAZIONE', document.getElementById('val_promo').value)}
+                ${section('CONCLUSIONE VENDITA')}
+                ${row('CARTA FAN', document.getElementById('cartafan').value)}
+                ${row('MYFANSAFE', document.getElementById('myfansafe').value)}
+                ${row('PROTOCOLLO', document.getElementById('protocollo').value)}
+                ${row('VALUTAZIONE', document.getElementById('val_carta').value)}
+                ${section('RIEPILOGO FINALE')}
+                ${textRow('CONSIDERAZIONI', considerazioni)}
+                ${textRow('CONCLUSIONE COMPLESSIVA', conclusione)}
+                <tr><td colspan="2" class="highlight">VALUTAZIONE COMPLESSIVA: ${valutazione}</td></tr>
+                ${textRow('GIUDIZIO RIEPILOGATIVO', giudizio)}
+                ${section('REDATTORE')}
+                ${row('REDATTO DA', redattore)}
+                ${row('RUOLO', ruolo)}
+            </table>
+            </body></html>`;
 
-            const addLine = (label, value, bold = false) => {
-                if (y > 270) { doc.addPage(); y = 20; }
-                doc.setFont('helvetica', bold ? 'bold' : 'normal');
-                doc.setTextColor(100, 100, 100);
-                doc.text(label, margin, y);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(52, 58, 64);
-                doc.text(String(value || 'N/D'), margin + 65, y);
-                y += 6;
+            // Apre finestra di stampa per salvare come PDF
+            const printWin = window.open('', '_blank', 'width=800,height=900');
+            if (!printWin) {
+                mostraMessaggio('Popup bloccati! Abilita i popup per questo sito.', 'error');
+                return;
+            }
+            printWin.document.write(htmlContent);
+            printWin.document.close();
+            printWin.focus();
+            printWin.onload = () => {
+                printWin.document.title = nomeFile;
+                printWin.print();
             };
 
-            const addSection = (title) => {
-                if (y > 260) { doc.addPage(); y = 20; }
-                y += 3;
-                doc.setFillColor(234, 242, 252);
-                doc.rect(margin - 2, y - 5, contentWidth + 4, 9, 'F');
-                doc.setDrawColor(74, 144, 226);
-                doc.setLineWidth(0.8);
-                doc.line(margin - 2, y - 5, margin - 2, y + 4);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(74, 144, 226);
-                doc.setFontSize(11);
-                doc.text(title, margin + 2, y);
-                doc.setFontSize(10);
-                doc.setTextColor(52, 58, 64);
-                y += 8;
-            };
-
-            const addTextBlock = (label, value) => {
-                if (y > 260) { doc.addPage(); y = 20; }
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(100, 100, 100);
-                doc.text(label, margin, y);
-                y += 5;
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(52, 58, 64);
-                const lines = doc.splitTextToSize(String(value || 'N/D'), contentWidth);
-                lines.forEach(line => {
-                    if (y > 270) { doc.addPage(); y = 20; }
-                    doc.text(line, margin, y);
-                    y += 5;
-                });
-                y += 2;
-            };
-
-            // Info base
-            addSection('INFORMAZIONI GENERALI');
-            addLine('PUNTO VENDITA:', pdv);
-            addLine('DATA:', document.getElementById('data').value);
-            addLine('ADDETTO:', addetto);
-            addLine('REPARTO:', document.getElementById('reparto').value);
-
-            // Accoglienza
-            addSection('ACCOGLIENZA');
-            addLine('SALUTO:', document.getElementById('saluto').value);
-            addLine('APPROCCIO:', document.getElementById('approccio').value);
-            addLine('EMPATIA:', document.getElementById('empatia').value);
-            addLine('VALUTAZIONE:', document.getElementById('val_saluto').value);
-
-            // Gestione Vendita
-            addSection('GESTIONE VENDITA');
-            addLine('TRATTATIVA:', document.getElementById('trattativa').value);
-            addLine('UP SELLING:', document.getElementById('upselling').value);
-            addLine('CONOSCENZE:', document.getElementById('conoscenze').value);
-            addLine('VALUTAZIONE:', document.getElementById('val_trattativa').value);
-
-            // Gestione KPI
-            addSection('GESTIONE KPI');
-            addLine('CROSS SELLING:', document.getElementById('crossselling').value);
-            addLine('GESTORE:', document.getElementById('gestore').value);
-            addLine('ESTENSIONI:', document.getElementById('estensioni').value);
-            addLine('VALUTAZIONE:', document.getElementById('val_cross').value);
-
-            // Uso Armi
-            addSection('USO ARMI');
-            addLine('PROMO IN CORSO:', document.getElementById('promo').value);
-            addLine('INDICAZIONI:', document.getElementById('indicazioni').value);
-            addLine('DILAZIONI:', document.getElementById('dilazioni').value);
-            addLine('VALUTAZIONE:', document.getElementById('val_promo').value);
-
-            // Conclusione Vendita
-            addSection('CONCLUSIONE VENDITA');
-            addLine('CARTA FAN:', document.getElementById('cartafan').value);
-            addLine('MYFANSAFE:', document.getElementById('myfansafe').value);
-            addLine('PROTOCOLLO:', document.getElementById('protocollo').value);
-            addLine('VALUTAZIONE:', document.getElementById('val_carta').value);
-
-            // Riepilogo finale
-            addSection('RIEPILOGO FINALE');
-            addTextBlock('CONSIDERAZIONI:', document.getElementById('considerazioni').value);
-            addTextBlock('CONCLUSIONE COMPLESSIVA:', document.getElementById('conclusione').value);
-
-            // Valutazione complessiva in evidenza
-            if (y > 255) { doc.addPage(); y = 20; }
-            y += 3;
-            doc.setFillColor(74, 144, 226);
-            doc.rect(margin - 2, y - 5, contentWidth + 4, 12, 'F');
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(12);
-            doc.text(`VALUTAZIONE COMPLESSIVA: ${valutazione}`, 105, y + 2, { align: 'center' });
-            doc.setFontSize(10);
-            y += 14;
-            doc.setTextColor(52, 58, 64);
-
-            addTextBlock('GIUDIZIO RIEPILOGATIVO:', document.getElementById('giudizio_riepilogativo').value);
-
-            // Redattore
-            y += 3;
-            addLine('REDATTO DA:', document.getElementById('redattore').value);
-            addLine('RUOLO:', document.getElementById('ruolo').value);
-
-            // Salva PDF e apri Spark Mail
-            const pdfBlob = doc.output('blob');
-            const pdfUrl = URL.createObjectURL(pdfBlob);
-
-            // Scarica il PDF
-            const a = document.createElement('a');
-            a.href = pdfUrl;
-            a.download = nomeFile;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            // Apri Spark Mail con destinatari, CC, oggetto e corpo precompilati
+            // Apri Spark Mail
             const destinatario = 'i.amorino@dml-italia.com';
             const cc = 'personale@dml-italia.com,g.gianfelice@dml-italia.com,g.querzola@dml-italia.com';
-            const soggetto = encodeURIComponent('TEST VENDITA');
+            const soggetto = encodeURIComponent(`Test Vendita ${pdv} ${addetto} ${valutazione}`);
             const corpo = encodeURIComponent('');
-
-            // Spark Mail su iOS/macOS — protocollo readdle-spark://
             const sparkUrl = `readdle-spark://compose?recipient=${encodeURIComponent(destinatario)}&cc=${encodeURIComponent(cc)}&subject=${soggetto}&body=${corpo}`;
-            // Fallback mailto: standard
-            const mailtoUrl = `mailto:${destinatario}?cc=${encodeURIComponent(cc)}&subject=${soggetto}&body=${corpo}`;
 
-            // Prova Spark, poi fallback mailto
-            const link = document.createElement('a');
-            link.style.display = 'none';
-            document.body.appendChild(link);
-
-            link.href = sparkUrl;
-            link.click();
-
-            // Dopo 1 secondo, se Spark non si è aperto, apri il client email di default
             setTimeout(() => {
-                link.href = mailtoUrl;
+                const link = document.createElement('a');
+                link.style.display = 'none';
+                link.href = sparkUrl;
+                document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-            }, 1000);
+            }, 1500);
 
-            mostraMessaggio('PDF creato e scaricato! Spark Mail si apre a breve...', 'success');
-            URL.revokeObjectURL(pdfUrl);
+            mostraMessaggio('PDF in preparazione — salva come PDF nella finestra di stampa!', 'success');
         }
 
         function sendEmail() {
