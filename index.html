@@ -867,7 +867,7 @@
                 y += 6;
             };
 
-            const addSection = (title, emoji) => {
+            const addSection = (title) => {
                 if (y > 260) { doc.addPage(); y = 20; }
                 y += 3;
                 doc.setFillColor(234, 242, 252);
@@ -878,7 +878,7 @@
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(74, 144, 226);
                 doc.setFontSize(11);
-                doc.text(`${emoji} ${title}`, margin + 2, y);
+                doc.text(title, margin + 2, y);
                 doc.setFontSize(10);
                 doc.setTextColor(52, 58, 64);
                 y += 8;
@@ -902,49 +902,49 @@
             };
 
             // Info base
-            addSection('INFORMAZIONI GENERALI', '📋');
+            addSection('INFORMAZIONI GENERALI');
             addLine('PUNTO VENDITA:', pdv);
             addLine('DATA:', document.getElementById('data').value);
             addLine('ADDETTO:', addetto);
             addLine('REPARTO:', document.getElementById('reparto').value);
 
             // Accoglienza
-            addSection('ACCOGLIENZA', '🤝');
+            addSection('ACCOGLIENZA');
             addLine('SALUTO:', document.getElementById('saluto').value);
             addLine('APPROCCIO:', document.getElementById('approccio').value);
             addLine('EMPATIA:', document.getElementById('empatia').value);
             addLine('VALUTAZIONE:', document.getElementById('val_saluto').value);
 
             // Gestione Vendita
-            addSection('GESTIONE VENDITA', '💼');
+            addSection('GESTIONE VENDITA');
             addLine('TRATTATIVA:', document.getElementById('trattativa').value);
             addLine('UP SELLING:', document.getElementById('upselling').value);
             addLine('CONOSCENZE:', document.getElementById('conoscenze').value);
             addLine('VALUTAZIONE:', document.getElementById('val_trattativa').value);
 
             // Gestione KPI
-            addSection('GESTIONE KPI', '🔄');
+            addSection('GESTIONE KPI');
             addLine('CROSS SELLING:', document.getElementById('crossselling').value);
             addLine('GESTORE:', document.getElementById('gestore').value);
             addLine('ESTENSIONI:', document.getElementById('estensioni').value);
             addLine('VALUTAZIONE:', document.getElementById('val_cross').value);
 
             // Uso Armi
-            addSection('USO ARMI', '🎯');
+            addSection('USO ARMI');
             addLine('PROMO IN CORSO:', document.getElementById('promo').value);
             addLine('INDICAZIONI:', document.getElementById('indicazioni').value);
             addLine('DILAZIONI:', document.getElementById('dilazioni').value);
             addLine('VALUTAZIONE:', document.getElementById('val_promo').value);
 
             // Conclusione Vendita
-            addSection('CONCLUSIONE VENDITA', '💳');
+            addSection('CONCLUSIONE VENDITA');
             addLine('CARTA FAN:', document.getElementById('cartafan').value);
             addLine('MYFANSAFE:', document.getElementById('myfansafe').value);
             addLine('PROTOCOLLO:', document.getElementById('protocollo').value);
             addLine('VALUTAZIONE:', document.getElementById('val_carta').value);
 
             // Riepilogo finale
-            addSection('RIEPILOGO FINALE', '📊');
+            addSection('RIEPILOGO FINALE');
             addTextBlock('CONSIDERAZIONI:', document.getElementById('considerazioni').value);
             addTextBlock('CONCLUSIONE COMPLESSIVA:', document.getElementById('conclusione').value);
 
@@ -984,7 +984,7 @@
             const destinatario = 'i.amorino@dml-italia.com';
             const cc = 'personale@dml-italia.com,g.gianfelice@dml-italia.com,g.querzola@dml-italia.com';
             const soggetto = encodeURIComponent('TEST VENDITA');
-            const corpo = encodeURIComponent(`In allegato il Test di Vendita di ${addetto} (${pdv}) con valutazione complessiva: ${valutazione}.\n\n⚠️ Ricorda di allegare il PDF appena scaricato!\n\nRedatto da: ${document.getElementById('redattore').value} - ${document.getElementById('ruolo').value}`);
+            const corpo = encodeURIComponent('');
 
             // Spark Mail su iOS/macOS — protocollo readdle-spark://
             const sparkUrl = `readdle-spark://compose?recipient=${encodeURIComponent(destinatario)}&cc=${encodeURIComponent(cc)}&subject=${soggetto}&body=${corpo}`;
